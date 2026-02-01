@@ -1,0 +1,43 @@
+{
+  "name": "@hey-bible/mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Hey Bible API",
+  "main": "dist/index.js",
+  "bin": {
+    "hey-bible-mcp": "./dist/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "bible",
+    "hey-bible",
+    "ai",
+    "llm"
+  ],
+  "author": "Hey Bible",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hey-Bible/hey-bible-mcp.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@hey-bible/client": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
