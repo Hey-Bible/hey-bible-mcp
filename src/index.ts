@@ -20,36 +20,20 @@ const api = new HeyBibleApi(config);
 
 const server = new McpServer({
   name: "hey-bible",
-  version: "1.0.0",
+  version: "1.1.0",
 });
 
-// Get verses tool
+// Get available Bibles
 server.registerTool(
-  "get_verses",
+  "get_bibles",
   {
     description:
-      "Get saved Bible verses from Hey Bible. Returns verses with their book, chapter, verse numbers, content, and any associated notes and images.",
-    inputSchema: {
-      id: z
-        .number()
-        .optional()
-        .describe("Specific verse ID to retrieve. If provided, returns only that verse."),
-      limit: z
-        .number()
-        .min(1)
-        .max(100)
-        .optional()
-        .describe("Number of verses to return (1-100). Ignored if id is specified."),
-      offset: z
-        .number()
-        .min(0)
-        .optional()
-        .describe("Number of verses to skip for pagination. Ignored if id is specified."),
-    },
+      "Get available Bible translations from Hey Bible. Returns a list of Bibles with their ID, name, abbreviation, and source.",
+    inputSchema: {},
   },
-  async ({ id, limit, offset }) => {
+  async () => {
     try {
-      const response = await api.versesGet({ id, limit, offset });
+      const response = await api.biblesGet();
       return {
         content: [
           {
@@ -64,7 +48,7 @@ server.registerTool(
         content: [
           {
             type: "text",
-            text: `Error fetching verses: ${message}`,
+            text: `Error fetching bibles: ${message}`,
           },
         ],
         isError: true,
@@ -73,7 +57,236 @@ server.registerTool(
   }
 );
 
-// Get notes tool
+// Get Bible books
+server.registerTool(
+  "get_books",
+  {
+    description:
+      "Get the list of Bible books from Hey Bible. Returns books with their name, 3-letter code, and chapter count.",
+    inputSchema: {},
+  },
+  async () => {
+    try {
+      const response = await api.booksGet();
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error fetching books: ${message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+
+// Search for verses
+server.registerTool(
+  "search_verses",
+  {
+    description:
+      "Search for Bible verses by book and chapter. Saves the result to the user's Hey Bible account. If start_verse and end_verse are omitted, returns the full chapter.",
+    inputSchema: {
+      book: z
+        .string()
+        .describe('Book name (e.g. "John", "Genesis", "1 Corinthians")'),
+      chapter: z.number().min(1).describe("Chapter number"),
+      start_verse: z
+        .number()
+        .min(1)
+        .optional()
+        .describe("Starting verse number (defaults to 1)"),
+      end_verse: z
+        .number()
+        .min(1)
+        .optional()
+        .describe("Ending verse number (defaults to last verse in chapter)"),
+      bible_id: z
+        .string()
+        .optional()
+        .describe(
+          "Bible translation ID (defaults to ESV). Use get_bibles to see available IDs."
+        ),
+    },
+  },
+  async ({ book, chapter, start_verse, end_verse, bible_id }) => {
+    try {
+      const response = await api.searchGet({
+        book,
+        chapter,
+        startVerse: start_verse,
+        endVerse: end_verse,
+        bibleId: bible_id,
+      });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error searching verses: ${message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+
+// Get favorite verses
+server.registerTool(
+  "get_favorites",
+  {
+    description:
+      "Get favorite Bible verses from Hey Bible. Returns favorited verses with their notes, images, conversations, and tags.",
+    inputSchema: {
+      tag: z
+        .string()
+        .optional()
+        .describe("Filter favorites by tag name"),
+      limit: z
+        .number()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Number of favorites to return (1-100)."),
+      offset: z
+        .number()
+        .min(0)
+        .optional()
+        .describe("Number of favorites to skip for pagination."),
+    },
+  },
+  async ({ tag, limit, offset }) => {
+    try {
+      const response = await api.favoritesGet({ tag, limit, offset });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error fetching favorites: ${message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+
+// Get chats
+server.registerTool(
+  "get_chats",
+  {
+    description:
+      "Get chat conversations from Hey Bible. Returns chats with verse context. If ID is provided, returns a single chat with its messages.",
+    inputSchema: {
+      id: z
+        .string()
+        .optional()
+        .describe("Specific chat ID (UUID) to retrieve with full messages."),
+      limit: z
+        .number()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Number of chats to return (1-100). Ignored if id is specified."),
+      offset: z
+        .number()
+        .min(0)
+        .optional()
+        .describe("Number of chats to skip for pagination. Ignored if id is specified."),
+    },
+  },
+  async ({ id, limit, offset }) => {
+    try {
+      const response = await api.chatsGet({ id, limit, offset });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error fetching chats: ${message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+
+// Get tags
+server.registerTool(
+  "get_tags",
+  {
+    description:
+      "Get all tags defined by the user in Hey Bible. Tags can be used to filter favorites.",
+    inputSchema: {},
+  },
+  async () => {
+    try {
+      const response = await api.tagsGet();
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error fetching tags: ${message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+
+// Get notes
 server.registerTool(
   "get_notes",
   {
@@ -123,7 +336,7 @@ server.registerTool(
   }
 );
 
-// Get images tool
+// Get images
 server.registerTool(
   "get_images",
   {
