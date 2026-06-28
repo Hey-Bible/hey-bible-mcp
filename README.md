@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Hey Bible" src="assets/og-image.png" width="1200" />
+</p>
+
 # @hey-bible/mcp
 
 MCP server for the Hey Bible API. Provides tools for searching Bible verses, browsing translations, and accessing your favorites, notes, images, chats, and tags.
