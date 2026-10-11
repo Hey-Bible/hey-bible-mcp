@@ -100,6 +100,10 @@ Parameters:
 - `limit` (optional): Number of notes to return (1-100)
 - `offset` (optional): Number of notes to skip for pagination
 
+### get_credits
+
+Credit balance for the API key owner, and the credit cost of each active image model. Does not spend credits. Call this before `generate_image`.
+
 ### generate_image
 
 Generate a new verse image and save it to the API key owner's gallery. Charges credits. Returns the image id and a 24-hour signed URL.

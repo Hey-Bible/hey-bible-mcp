@@ -389,6 +389,36 @@ server.registerTool(
 );
 
 server.registerTool(
+  "get_credits",
+  {
+    description:
+      "Get the Hey Bible credit balance for the API key owner, plus the credit cost of each active image model. Call this before generate_image. Does not spend credits.",
+    inputSchema: {},
+  },
+  async () => {
+    try {
+      const response = await fetch("https://api.heybible.app/credits", {
+        headers: { "X-Hey-Bible-Api-Key": API_KEY as string },
+      });
+      const text = await response.text();
+      if (!response.ok) {
+        return {
+          content: [{ type: "text", text: `Error fetching credits (${response.status}): ${text}` }],
+          isError: true,
+        };
+      }
+      return { content: [{ type: "text", text }] };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return {
+        content: [{ type: "text", text: `Error fetching credits: ${message}` }],
+        isError: true,
+      };
+    }
+  }
+);
+
+server.registerTool(
   "generate_image",
   {
     description:
