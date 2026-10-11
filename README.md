@@ -100,6 +100,23 @@ Parameters:
 - `limit` (optional): Number of notes to return (1-100)
 - `offset` (optional): Number of notes to skip for pagination
 
+### get_credits
+
+Credit balance for the API key owner, and the credit cost of each active image model. Does not spend credits. Call this before `generate_image`.
+
+### generate_image
+
+Generate a new verse image and save it to the API key owner's gallery. Charges credits. Returns the image id and a 24-hour signed URL.
+
+Parameters:
+- `book` / `chapter` / `start_verse` / `end_verse` / `bible_id` — locate the verse, unless `verse_id` is set
+- `verse_id` (optional): existing verse id
+- `theme` (optional): `medieval`, `landscape`, `literal`, `stained_glass`, `fantasy`, `animals`, `celestial`, `flowers`, `watercolor`, `minimalist`, or `custom`
+- `theme_content` (optional): required when theme is `custom`
+- `size` (optional): `portrait`, `square`, or `landscape`
+- `model` (optional): Venice model id
+- `quote` / `source` / `copyright` (optional): overlay text. Defaults to the verse.
+
 ### get_images
 
 Get AI-generated images associated with Bible verses.

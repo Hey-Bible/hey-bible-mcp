@@ -388,6 +388,100 @@ server.registerTool(
   }
 );
 
+server.registerTool(
+  "get_credits",
+  {
+    description:
+      "Get the Hey Bible credit balance for the API key owner, plus the credit cost of each active image model. Call this before generate_image. Does not spend credits.",
+    inputSchema: {},
+  },
+  async () => {
+    try {
+      const response = await fetch("https://api.heybible.app/credits", {
+        headers: { "X-Hey-Bible-Api-Key": API_KEY as string },
+      });
+      const text = await response.text();
+      if (!response.ok) {
+        return {
+          content: [{ type: "text", text: `Error fetching credits (${response.status}): ${text}` }],
+          isError: true,
+        };
+      }
+      return { content: [{ type: "text", text }] };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return {
+        content: [{ type: "text", text: `Error fetching credits: ${message}` }],
+        isError: true,
+      };
+    }
+  }
+);
+
+server.registerTool(
+  "generate_image",
+  {
+    description:
+      "Generate a new Hey Bible verse image and save it to the API key owner's gallery. Charges credits. Does not publish anything. Returns the image id and a 24-hour signed URL. Themes include medieval, landscape, literal, stained_glass, fantasy, animals, celestial, flowers, watercolor, minimalist, and custom.",
+    inputSchema: {
+      book: z.string().optional().describe("Book name, required unless verse_id is set"),
+      chapter: z.number().min(1).optional().describe("Chapter number"),
+      start_verse: z.number().min(1).optional().describe("Starting verse"),
+      end_verse: z.number().min(1).optional().describe("Ending verse"),
+      bible_id: z.string().optional().describe("Bible translation ID. Defaults to the account default."),
+      verse_id: z.number().optional().describe("Existing Hey Bible verse id, if already known"),
+      theme: z
+        .enum([
+          "animals",
+          "celestial",
+          "custom",
+          "fantasy",
+          "flowers",
+          "landscape",
+          "literal",
+          "medieval",
+          "minimalist",
+          "stained_glass",
+          "watercolor",
+        ])
+        .optional()
+        .describe("Image theme. Defaults to landscape. Use medieval for knights, castles, and chivalry."),
+      theme_content: z.string().optional().describe("Required when theme is custom"),
+      size: z.enum(["portrait", "square", "landscape"]).optional().describe("Defaults to square"),
+      model: z.string().optional().describe("Optional Venice model id. Defaults to the app default."),
+      quote: z.string().optional().describe("Overlay text. Defaults to the verse text."),
+      source: z.string().optional().describe("Citation line. Defaults to the verse reference."),
+      copyright: z.string().optional().describe("Optional copyright line for the overlay"),
+    },
+  },
+  async (input) => {
+    try {
+      const response = await fetch("https://api.heybible.app/images", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Hey-Bible-Api-Key": API_KEY as string,
+        },
+        body: JSON.stringify(input),
+      });
+      const text = await response.text();
+      if (!response.ok) {
+        return {
+          content: [{ type: "text", text: `Error generating image (${response.status}): ${text}` }],
+          isError: true,
+        };
+      }
+      return { content: [{ type: "text", text }] };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return {
+        content: [{ type: "text", text: `Error generating image: ${message}` }],
+        isError: true,
+      };
+    }
+  }
+);
+
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
