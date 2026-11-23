@@ -1,6 +1,6 @@
 {
   "name": "@hey-bible/mcp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "MCP server for Hey Bible API",
   "main": "dist/index.js",
   "bin": {
@@ -10,7 +10,8 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "vitest run"
   },
   "keywords": [
     "mcp",
@@ -29,13 +30,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@hey-bible/client": "^1.1.0",
+    "@hey-bible/client": "^1.2.0",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.7"
   },
   "engines": {
     "node": ">=18.0.0"
