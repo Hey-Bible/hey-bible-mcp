@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
@@ -9,7 +10,13 @@ import {
   type FetchAPI,
 } from "@hey-bible/client";
 
-export const SERVER_VERSION = "1.1.0";
+/**
+ * The version this server reports to MCP clients. It is read from
+ * package.json, which the release workflow sets from the release tag, so it
+ * cannot fall behind the version published to npm. package.json sits one level
+ * up from both src/ (tests) and dist/ (the published build).
+ */
+export const SERVER_VERSION: string = createRequire(import.meta.url)("../package.json").version;
 
 export class MissingApiKeyError extends Error {
   constructor() {

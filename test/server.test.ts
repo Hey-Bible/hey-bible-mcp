@@ -5,7 +5,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { createApi, createServer, MissingApiKeyError } from "../src/server.js";
+import { readFileSync } from "node:fs";
+import { createApi, createServer, MissingApiKeyError, SERVER_VERSION } from "../src/server.js";
 
 interface FakeCall {
   url: string;
@@ -69,6 +70,15 @@ const SUCCESS_BODY = {
   },
   credits_charged: 3,
 };
+
+describe("server version", () => {
+  it("reports the version in package.json, which the release workflow sets from the tag", async () => {
+    const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf-8"));
+    expect(SERVER_VERSION).toBe(pkg.version);
+    const client = await connect(fakeFetch(200, {}).fetchApi);
+    expect(client.getServerVersion()).toMatchObject({ name: "hey-bible", version: pkg.version });
+  });
+});
 
 describe("createApi", () => {
   it("requires HEY_BIBLE_API_KEY", () => {
