@@ -4,7 +4,7 @@
 
 # @hey-bible/mcp
 
-MCP server for the Hey Bible API. Provides tools for searching Bible verses, browsing translations, and accessing your favorites, notes, images, chats, and tags.
+MCP server for the Hey Bible API. Provides tools for searching Bible verses, browsing translations, accessing your favorites, notes, images, chats, and tags, and making new verse pictures.
 
 ## Installation
 
@@ -27,6 +27,8 @@ export HEY_BIBLE_API_KEY=your_api_key_here
 ```
 
 Get your API key from [Hey Bible](https://heybible.app) under Account > API Keys.
+
+To point the server at a different API, such as a local stack, set `HEY_BIBLE_API_URL` to its base URL. When it is unset the server uses `https://api.heybible.app`. The CLI reads the same variable.
 
 ## Usage with Claude Desktop
 
@@ -109,6 +111,27 @@ Parameters:
 - `limit` (optional): Number of images to return (1-100)
 - `offset` (optional): Number of images to skip for pagination
 
+### generate_image
+
+Draw a new picture for a verse and save it to the account, the same way the app does. **This spends the account's credits**, so an agent should ask before calling it. Returns the new image's id (`image_id`), a signed link that works for 24 hours (`signed_url`), and the credits it cost (`credits_charged`).
+
+Name the verse with `verse_id`, or with `book` and `chapter`:
+- `verse_id` (optional): ID of a verse already saved to the account
+- `book`, `chapter` (required together when `verse_id` is not set)
+- `start_verse`, `end_verse` (optional): The passage. `end_verse` defaults to `start_verse`.
+- `bible_id` (optional): Bible translation ID
+
+Optional settings:
+- `theme`: `hey_bible` (default), `animals`, `celestial`, `custom`, `fantasy`, `flowers`, `landscape`, `literal`, `medieval`, `minimalist`, `stained_glass` or `watercolor`
+- `theme_content`: What to draw. Required when `theme` is `custom`.
+- `size`: `portrait`, `square` (default) or `landscape`
+- `model`: Image model ID. Models cost different numbers of credits.
+- `quote`: Text printed on the picture. Defaults to the verse text.
+- `source`: Citation printed under the quote. Defaults to the verse reference.
+- `copyright`: Copyright line. Ignored when the translation has its own.
+
+Errors come back as tool errors with the API's message. A 400 means the input was wrong and no credits were spent. A 402 means the account is out of credits.
+
 ## Development
 
 ```bash
@@ -117,6 +140,9 @@ npm install
 
 # Build
 npm run build
+
+# Test (uses a fake fetch; never calls the real API or spends credits)
+npm test
 
 # Run locally
 HEY_BIBLE_API_KEY=your_key node dist/index.js
